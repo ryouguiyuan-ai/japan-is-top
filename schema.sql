@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS mountains (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, region TEXT, elevation REAL, area_ha REAL, forest_type TEXT, created_at TEXT);
+CREATE TABLE IF NOT EXISTS tree_species (id INTEGER PRIMARY KEY AUTOINCREMENT, mountain_id INTEGER NOT NULL, species_name TEXT NOT NULL, coverage_pct REAL, age_years INTEGER, volume_m3 REAL, FOREIGN KEY (mountain_id) REFERENCES mountains(id));
+CREATE TABLE IF NOT EXISTS forest_boundaries (id INTEGER PRIMARY KEY AUTOINCREMENT, mountain_id INTEGER NOT NULL, boundary_wkt TEXT, plot_number TEXT, land_class TEXT, FOREIGN KEY (mountain_id) REFERENCES mountains(id));
+CREATE TABLE IF NOT EXISTS ownership (id INTEGER PRIMARY KEY AUTOINCREMENT, mountain_id INTEGER NOT NULL, owner_name TEXT, owner_type TEXT, contact TEXT, registered_at TEXT, FOREIGN KEY (mountain_id) REFERENCES mountains(id));
