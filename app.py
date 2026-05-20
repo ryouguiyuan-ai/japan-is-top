@@ -1,7 +1,12 @@
 import json
+import os
 import sqlite3
 
-from flask import Flask, jsonify, render_template
+from anthropic import Anthropic
+from dotenv import load_dotenv
+from flask import Flask, jsonify, render_template, request
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
@@ -43,6 +48,35 @@ def api_mountains():
 @app.route("/map")
 def map_page():
     return render_template("map.html")
+
+
+@app.route("/api/recommend", methods=["POST"])
+def api_recommend():
+    data = request.get_json(silent=True) or {}
+    mood = data.get("mood", "").strip()
+    if not mood:
+        return jsonify({"error": "mood is required"}), 400
+
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        return jsonify({"error": "ANTHROPIC_API_KEY is not set"}), 500
+
+    client = Anthropic(api_key=api_key)
+    message = client.messages.create(
+        model="claude-haiku-4-5",
+        max_tokens=256,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f"日本の山で {mood} な気分の人におすすめの山を"
+                    "1つ、150字以内で教えてください"
+                ),
+            }
+        ],
+    )
+    recommendation = message.content[0].text
+    return jsonify({"recommendation": recommendation})
 
 
 if __name__ == "__main__":
